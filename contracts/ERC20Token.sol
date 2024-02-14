@@ -5,6 +5,7 @@ contract ERC20Token {
     string private s_name;
     string private s_symbol;
     uint256 private s_totalSupply;
+    mapping(address => uint256) private s_balances;
 
     constructor(
         string memory _name,
@@ -26,5 +27,9 @@ contract ERC20Token {
 
     function totalSupply() public view returns (uint256) {
         return i_totalSupply;
+    }
+
+    function balanceOf(address _owner) public view returns (uint256 balance) {
+        balance = s_balances[_owner];
     }
 }
