@@ -15,4 +15,16 @@ contract ERC20Token {
         s_symbol = _symbol;
         i_totalSupply = _totalSupply;
     }
+
+    function name() public view returns (string memory) {
+        return s_name;
+    }
+
+    function symbol() public view returns (string memory) {
+        return s_symbol;
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return i_totalSupply;
+    }
 }
