@@ -12,16 +12,19 @@ contract ERC20Token {
     string private s_name;
     string private s_symbol;
     uint256 private s_totalSupply;
+    uint8 private s_decimal;
     mapping(address => uint256) private s_balances;
     mapping(address => mapping(address => uint256)) private s_approvedSpenders;
 
     constructor(
         string memory _name,
         string memory _symbol,
+        uint8 _decimal,
         uint256 _totalSupply
     ) {
         s_name = _name;
         s_symbol = _symbol;
+        s_decimal = _decimal;
         _mint(msg.sender, _totalSupply);
     }
 
@@ -31,6 +34,10 @@ contract ERC20Token {
 
     function symbol() public view returns (string memory) {
         return s_symbol;
+    }
+
+    function decimal() public view returns (uint8) {
+        return s_decimal;
     }
 
     function totalSupply() public view returns (uint256) {
@@ -87,9 +94,9 @@ contract ERC20Token {
 
     function _mint(address _owner, uint256 _value) internal {
         require(_owner != address(0));
-        s_totalSupply += _value;
-        s_balances[_owner] += _value;
-        emit Transfer(address(0), _owner, _value);
+        s_totalSupply += (_value * (10 ^ s_decimal));
+        s_balances[_owner] += (_value * (10 ^ s_decimal));
+        emit Transfer(address(0), _owner, (_value * (10 ^ s_decimal)));
     }
 
     function _burn(address _owner, uint256 _value) internal {
