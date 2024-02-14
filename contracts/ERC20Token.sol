@@ -50,4 +50,22 @@ contract ERC20Token {
         emit Transfer(msg.sender, _to, _amount);
         return true;
     }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+        require(_amount <= balanceOf(_from));
+        require(_to != address(0));
+        uint256 previousBalances = balanceOf(_from) + balanceOf(_to);
+        s_balances[_from] -= _value;
+        s_balances[_to] += _value;
+        if (balanceOf(_from) + balanceOf(_to) == previousBalances) {
+            emit Transfer(_from, _to, _value);
+            success = true;
+        } else {
+            success = false;
+        }
+    }
 }
