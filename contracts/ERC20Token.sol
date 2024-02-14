@@ -94,4 +94,12 @@ contract ERC20Token {
         s_balances[_owner] += _value;
         emit Transfer(address(0), _owner, _value);
     }
+
+    function _burn(address _owner, uint256 _value) internal {
+        require(_owner != address(0));
+        require(_value <= balanceOf(_owner));
+        s_balances[_owner] -= _value;
+        s_totalSupply -= _value;
+        emit Transfer(_owner, address(0), _value);
+    }
 }
