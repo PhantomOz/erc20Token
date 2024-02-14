@@ -12,6 +12,7 @@ contract ERC20Token {
     string private s_symbol;
     uint256 private s_totalSupply;
     mapping(address => uint256) private s_balances;
+    mapping(address => mapping(address => uint256)) private s_approvedSpenders;
 
     constructor(
         string memory _name,
@@ -67,5 +68,14 @@ contract ERC20Token {
         } else {
             success = false;
         }
+    }
+
+    function approve(
+        address _spender,
+        uint256 _value
+    ) public returns (bool succcess) {
+        require(_spender != address(0));
+        s_approvedSpenders[msg.sender][_spender] = _value;
+        succcess = true;
     }
 }
