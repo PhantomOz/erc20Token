@@ -12,19 +12,19 @@ contract ERC20Token {
     string private s_name;
     string private s_symbol;
     uint256 private s_totalSupply;
-    uint8 private s_decimal;
+    uint8 private s_decimals;
     mapping(address => uint256) private s_balances;
     mapping(address => mapping(address => uint256)) private s_approvedSpenders;
 
     constructor(
         string memory _name,
         string memory _symbol,
-        uint8 _decimal,
+        uint8 _decimals,
         uint256 _totalSupply
     ) {
         s_name = _name;
         s_symbol = _symbol;
-        s_decimal = _decimal;
+        s_decimals = _decimals;
         _mint(msg.sender, _totalSupply);
     }
 
@@ -36,8 +36,8 @@ contract ERC20Token {
         return s_symbol;
     }
 
-    function decimal() public view returns (uint8) {
-        return s_decimal;
+    function decimals() public view returns (uint8) {
+        return s_decimals;
     }
 
     function totalSupply() public view returns (uint256) {
@@ -55,7 +55,7 @@ contract ERC20Token {
         s_balances[msg.sender] -= (_amount - _cut);
         s_balances[_to] += (_amount - _cut);
         _burn(msg.sender, _cut);
-        emit Transfer(msg.sender, _to, _amount);
+        emit Transfer(msg.sender, _to, (_amount - _cut));
         return true;
     }
 
@@ -71,7 +71,7 @@ contract ERC20Token {
         s_balances[_from] -= (_value - _cut);
         s_balances[_to] += (_value - _cut);
         _burnFrom(_from, _cut);
-        emit Transfer(_from, _to, _value);
+        emit Transfer(_from, _to, (_value - _cut));
         success = true;
     }
 
@@ -94,9 +94,9 @@ contract ERC20Token {
 
     function _mint(address _owner, uint256 _value) internal {
         require(_owner != address(0));
-        s_totalSupply += (_value * (10 ^ s_decimal));
-        s_balances[_owner] += (_value * (10 ^ s_decimal));
-        emit Transfer(address(0), _owner, (_value * (10 ^ s_decimal)));
+        s_totalSupply += (_value * (10 ** s_decimals));
+        s_balances[_owner] += (_value * (10 ** s_decimals));
+        emit Transfer(address(0), _owner, (_value * (10 ** s_decimals)));
     }
 
     function _burn(address _owner, uint256 _value) internal {
