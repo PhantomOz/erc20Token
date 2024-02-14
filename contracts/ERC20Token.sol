@@ -87,4 +87,11 @@ contract ERC20Token {
     ) public view returns (uint256 remaining) {
         remaining = s_approvedSpenders[_owner][_spender];
     }
+
+    function _mint(address _owner, uint256 _value) internal {
+        require(_owner != address(0));
+        s_totalSupply += _value;
+        s_balances[_owner] += _value;
+        emit Transfer(address(0), _owner, _value);
+    }
 }
