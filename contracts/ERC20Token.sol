@@ -34,7 +34,7 @@ contract ERC20Token {
     }
 
     function totalSupply() public view returns (uint256) {
-        return i_totalSupply;
+        return s_totalSupply;
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
@@ -44,7 +44,7 @@ contract ERC20Token {
     function transfer(address _to, uint256 _amount) public returns (bool) {
         require(_amount <= balanceOf(msg.sender));
         require(_to != address(0));
-        uint256 _cut = _amount * 0.1;
+        uint256 _cut = (_amount * 10) / 100;
         s_balances[msg.sender] -= (_amount - _cut);
         s_balances[_to] += (_amount - _cut);
         _burn(msg.sender, _cut);
@@ -60,7 +60,7 @@ contract ERC20Token {
         require(_value <= balanceOf(_from));
         require(_value <= allowance(_from, msg.sender));
         require(_to != address(0));
-        uint256 _cut = _value * 0.1;
+        uint256 _cut = (_value * 10) / 100;
         s_balances[_from] -= (_value - _cut);
         s_balances[_to] += (_value - _cut);
         _burnFrom(_from, _cut);
