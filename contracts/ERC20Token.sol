@@ -22,7 +22,7 @@ contract ERC20Token {
     ) {
         s_name = _name;
         s_symbol = _symbol;
-        i_totalSupply = _totalSupply;
+        _mint(msg.sender, _totalSupply);
     }
 
     function name() public view returns (string memory) {
@@ -44,11 +44,10 @@ contract ERC20Token {
     function transfer(address _to, uint256 _amount) public returns (bool) {
         require(_amount <= balanceOf(msg.sender));
         require(_to != address(0));
-
-        uint256 previousBalances = balanceOf(msg.sender) + balanceOf(_to);
-        s_balances[msg.sender] -= _amount;
-        s_balances[_to] += _amount;
-        require(balanceOf(msg.sender) + balanceOf(_to) == previousBalances);
+        uint256 _cut = _amount * 0.1;
+        s_balances[msg.sender] -= (_amount - _cut);
+        s_balances[_to] += (_amount - _cut);
+        _burn(msg.sender, _cut);
         emit Transfer(msg.sender, _to, _amount);
         return true;
     }
@@ -58,17 +57,15 @@ contract ERC20Token {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-        require(_amount <= balanceOf(_from));
+        require(_value <= balanceOf(_from));
+        require(_value <= allowance(_from, msg.sender));
         require(_to != address(0));
-        uint256 previousBalances = balanceOf(_from) + balanceOf(_to);
-        s_balances[_from] -= _value;
-        s_balances[_to] += _value;
-        if (balanceOf(_from) + balanceOf(_to) == previousBalances) {
-            emit Transfer(_from, _to, _value);
-            success = true;
-        } else {
-            success = false;
-        }
+        uint256 _cut = _value * 0.1;
+        s_balances[_from] -= (_value - _cut);
+        s_balances[_to] += (_value - _cut);
+        _burnFrom(_from, _cut);
+        emit Transfer(_from, _to, _value);
+        success = true;
     }
 
     function approve(
