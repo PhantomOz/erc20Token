@@ -2,10 +2,11 @@
 pragma solidity ^0.8.18;
 
 contract ERC20Token {
-    event Transfer(
-        address indexed sender,
-        address indexed receiver,
-        uint256 indexed value
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(
+        address indexed _owner,
+        address indexed _spender,
+        uint256 _value
     );
 
     string private s_name;
@@ -76,6 +77,7 @@ contract ERC20Token {
     ) public returns (bool succcess) {
         require(_spender != address(0));
         s_approvedSpenders[msg.sender][_spender] = _value;
+        emit Approval(msg.sender, _spender, _value);
         succcess = true;
     }
 }
