@@ -80,4 +80,11 @@ contract ERC20Token {
         emit Approval(msg.sender, _spender, _value);
         succcess = true;
     }
+
+    function allowance(
+        address _owner,
+        address _spender
+    ) public view returns (uint256 remaining) {
+        remaining = s_approvedSpenders[_owner][_spender];
+    }
 }
