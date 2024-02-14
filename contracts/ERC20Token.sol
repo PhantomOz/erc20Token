@@ -102,4 +102,12 @@ contract ERC20Token {
         s_totalSupply -= _value;
         emit Transfer(_owner, address(0), _value);
     }
+
+    function _burnFrom(address _owner, uint256 _value) internal {
+        require(_owner != address(0));
+        require(_value <= allowance(_owner, msg.sender));
+
+        s_approvedSpenders[_owner][msg.sender] -= _value;
+        _burn(_owner, _value);
+    }
 }
