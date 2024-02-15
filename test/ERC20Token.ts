@@ -60,8 +60,23 @@ describe("ERC20Token", function () {
       
       const totalSupply = Number(await token.totalSupply())/(10**18);
       await expect(totalSupply).to.be.equals(newTotalSupply);
-    })
+    });
+  });
 
-  })
+  describe("Approve", function(){
+    it("Should revert if spender is zero address", async function(){
+      const {token} = await loadFixture(deployToken);
+      const zeroAddress = await ethers.ZeroAddress;
+      await expect(token.approve(zeroAddress, 20000000000)).to.be.revertedWith("Zero Address can't be a spender");
+    });
+    it("Should approve spender and emit Approval event get spender value", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      await expect(await token.approve(otherAccount, 20000000000)).to
+        .emit(token, "Approval").withArgs(owner,otherAccount, 20000000000);
+
+      await expect(await token.allowance(owner,otherAccount)).to.be.equals(20000000000);
+    });
+  });
+
   
 });

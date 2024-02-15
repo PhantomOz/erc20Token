@@ -78,11 +78,11 @@ contract ERC20Token {
     function approve(
         address _spender,
         uint256 _value
-    ) public returns (bool succcess) {
-        require(_spender != address(0));
+    ) public returns (bool success) {
+        require(_spender != address(0), "Zero Address can't be a spender");
         s_approvedSpenders[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
-        succcess = true;
+        success = true;
     }
 
     function allowance(
