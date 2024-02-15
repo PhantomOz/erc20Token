@@ -49,8 +49,8 @@ contract ERC20Token {
     }
 
     function transfer(address _to, uint256 _amount) public returns (bool) {
-        require(_amount <= balanceOf(msg.sender));
-        require(_to != address(0));
+        require(_amount <= balanceOf(msg.sender), "Insufficient Balance");
+        require(_to != address(0), "Can't send to zero address");
         uint256 _cut = (_amount * 10) / 100;
         s_balances[msg.sender] -= (_amount - _cut);
         s_balances[_to] += (_amount - _cut);

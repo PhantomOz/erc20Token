@@ -35,5 +35,33 @@ describe("ERC20Token", function () {
       await expect(await token.balanceOf(owner)).to.be.equals(await token.totalSupply());
     })
   });
+  describe("Transfer", function(){
+    it("Should revert if amount is greater than balance", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      await expect(token.connect(otherAccount).transfer(owner, 200)).to.be.revertedWith("Insufficient Balance");
+    });
+    it("Should revert if recipient is zero address", async function(){
+      const {token} = await loadFixture(deployToken);
+      const zeroAddress = await ethers.ZeroAddress;
+      const amount = Number(2000e18).toFixed(0);
+      await expect(token.transfer(zeroAddress, parseInt(amount))).to.be.revertedWith("Can't send to zero address");
+    });
+    it("Should burn 10% of the token about to be transferred and send the rest to the recipient", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      const zeroAddress = await ethers.ZeroAddress;
+      const amount = 2000000;
+      const cut = amount * 10 / 100;
+      const amountToSend = amount - cut;
+      const newTotalSupply = (parseInt(`${await token.totalSupply()}`) - cut)/(10**18);
+
+      await expect(await token.transfer(otherAccount, amount)).to
+        .emit(token, "Transfer").withArgs(owner, zeroAddress, cut)
+        .emit(token, "Transfer").withArgs(owner, otherAccount, amountToSend);
+      
+      const totalSupply = Number(await token.totalSupply())/(10**18);
+      await expect(totalSupply).to.be.equals(newTotalSupply);
+    })
+
+  })
   
 });
