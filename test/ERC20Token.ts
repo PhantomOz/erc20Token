@@ -1,7 +1,6 @@
 import {
   loadFixture,
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -13,12 +12,12 @@ describe("ERC20Token", function () {
     const TOTALSUPPLY = 200000000000;
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, otherAccount, thirdAccount] = await ethers.getSigners();
 
     const Token = await ethers.getContractFactory("ERC20Token");
     const token = await Token.deploy(NAME,SYMBOL,DECIMAL,TOTALSUPPLY);
 
-    return { token, owner, otherAccount, NAME, SYMBOL, DECIMAL, TOTALSUPPLY};
+    return { token, owner, otherAccount, thirdAccount, NAME, SYMBOL, DECIMAL, TOTALSUPPLY};
   }
 
   describe("Deployment", function(){
@@ -78,5 +77,44 @@ describe("ERC20Token", function () {
     });
   });
 
+  describe("TransferFrom", function(){
+    it("Should revert is sender does not have enough allowance", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      const zeroAddress = await ethers.ZeroAddress;
+      await expect(token.connect(otherAccount).transferFrom(owner, zeroAddress, 20000000)).to.be.rejectedWith("No Allowance");
+    });
+    it("Should revert is owner balance is not enough", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      await token.transfer(otherAccount, 20000000000);
+      await token.connect(otherAccount).approve(owner, 30000000000);
+      const zeroAddress = await ethers.ZeroAddress;
+      await expect(token.transferFrom(otherAccount, zeroAddress, 30000000000)).to.be.rejectedWith("Insufficient Balance on owner");
+    });
+    it("Should revert if recipient is zero address", async function(){
+      const {token, owner, otherAccount} = await loadFixture(deployToken);
+      await token.transfer(otherAccount, 20000000000);
+      await token.connect(otherAccount).approve(owner, 30000000000);
+      const zeroAddress = await ethers.ZeroAddress;
+      await expect(token.transferFrom(otherAccount, zeroAddress, 14000000000)).to.be.rejectedWith("Recipient can't be zero address");
+    });
+    it("Should transfer from otherAcccount succesfully and burn 10% of the amount being transferred", async function(){
+      const {token, owner, otherAccount, thirdAccount} = await loadFixture(deployToken);
+      await token.transfer(otherAccount, 20000000000);
+      await token.connect(otherAccount).approve(owner, 30000000000);
+      const zeroAddress = await ethers.ZeroAddress;
+      const amount = 14000000000;
+      const cut = amount * 10 / 100;
+      const amountToSend = amount - cut;
+      const newTotalSupply = (parseInt(`${await token.totalSupply()}`) - cut)/(10**18);
+
+      await expect(token.transferFrom(otherAccount, thirdAccount, amount)).to
+        .emit(token, "Transfer").withArgs(otherAccount, zeroAddress, cut)
+        .emit(token, "Transfer").withArgs(otherAccount, thirdAccount, amountToSend);
+      
+      const totalSupply = Number(await token.totalSupply())/(10**18);
+      await expect(totalSupply).to.be.equals(newTotalSupply);
+      await expect(await token.allowance(otherAccount, owner)).to.be.equals(30000000000 - amount);
+    });
+  })
   
 });

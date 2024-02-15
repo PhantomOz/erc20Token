@@ -64,12 +64,13 @@ contract ERC20Token {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-        require(_value <= balanceOf(_from));
-        require(_value <= allowance(_from, msg.sender));
-        require(_to != address(0));
+        require(_value <= allowance(_from, msg.sender), "No Allowance");
+        require(_value <= balanceOf(_from), "Insufficient Balance on owner");
+        require(_to != address(0), "Recipient can't be zero address");
         uint256 _cut = (_value * 10) / 100;
         s_balances[_from] -= (_value - _cut);
         s_balances[_to] += (_value - _cut);
+        s_approvedSpenders[_from][msg.sender] -= (_value - _cut);
         _burnFrom(_from, _cut);
         emit Transfer(_from, _to, (_value - _cut));
         success = true;
